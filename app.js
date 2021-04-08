@@ -31,9 +31,10 @@ request(
             log(chalk.yellowBright('Unable to find location.'))
         } else {
             const data = response.body.features[0]
+
+            // the value within center object is [long, lat] so we need to reverse these values
             const latLong = data.center.reverse().join()
 
-            log(latLong)
             request(
                 setting.weatherstack.url,
                 {
