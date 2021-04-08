@@ -15,37 +15,44 @@ const input = yargs.options(
     }
 ).argv
 
-
-request(
-    setting.mapBox.url + input.place + '.json',
-    {
-        method: 'GET',
-        json: true,
-        qs: {
-            access_token: setting.mapBox.api,
-            limit: 1,
+// this is some how similar to python decorators
+const getGeoCode = (location, callback) => {
+    request(
+        setting.mapBox.url + location + '.json',
+        {
+            method: 'GET',
+            json: true,
+            qs: {
+                access_token: setting.mapBox.api,
+                limit: 1
+            }
+        },
+        (error, response, body) => {
+            if (error) {
+                log(chalk.red('Unable to connect with mab box api.'))
+            } else if (body.error) {
+                log(chalk.red('Unable to fetch geo data records.'))
+            } else {
+                callback(body.features[0].center.reverse().join())
+            }
         }
-    },
-    (error, response) => {
-        if (error) {
-            log(chalk.yellowBright('Unable to find location.'))
-        } else {
-            const data = response.body.features[0]
+    )
+}
 
-            // the value within center object is [long, lat] so we need to reverse these values
-            const latLong = data.center.reverse().join()
-
-            request(
-                setting.weatherstack.url,
-                {
-                    method: 'GET',
-                    json: true,
-                    qs: {
-                        access_key: setting.weatherstack.api,
-                        query: latLong
-                    }
-                },
-                (error, response) => {
+getGeoCode(
+    input.place,
+    (latLong) => {
+        request(
+            setting.weatherstack.url,
+            {
+                method: 'GET',
+                json: true,
+                qs: {
+                    access_key: setting.weatherstack.api,
+                    query: latLong
+                }
+            },
+            (error, response) => {
                     if (error) {
                         log(chalk.red('Unable to fetch weather data due to some error.'))
                     } else {
@@ -59,7 +66,5 @@ request(
                     }
                 }
             )
-        }
     }
 )
-
