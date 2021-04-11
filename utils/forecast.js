@@ -1,5 +1,6 @@
 const request = require('request')
 const settings = require('../config/settings')
+
 const forecast = (latLong, callback) => {
     request(
         settings.weatherstack.url,
@@ -11,7 +12,7 @@ const forecast = (latLong, callback) => {
                 query: latLong
             }
         },
-        (error, response, body) => {
+        (error, {body}) => {
             if (error){
                 callback('Unable to reach weather stack api.', undefined)
             }else if(body.error){

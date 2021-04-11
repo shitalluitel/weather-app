@@ -14,7 +14,7 @@ const getGeoCode = (location, callback) => {
                 limit: 1
             }
         },
-        (error, response, body) => {
+        (error, { body }) => {
             if (error) {
                 callback(chalk.red('Unable to connect with mab box api.'), undefined)
             } else if (body.error) {
